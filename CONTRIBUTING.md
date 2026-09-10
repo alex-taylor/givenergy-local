@@ -16,7 +16,7 @@ Pull requests are the best way to propose changes to the codebase.
 1. Fork the repo and create your branch from `master`.
 2. Ensure your development and test environment is configured correctly (see below).
 3. If you've changed something, update the documentation.
-4. Test you contribution, and ensure any relevant tests have been updated.
+4. Test your contribution, and ensure any relevant tests have been updated.
 5. Open a pull request.
 
 ## Any contributions you make will be under the MIT Software License
@@ -42,28 +42,49 @@ Report a bug by [opening a new issue](../../issues/new/choose).
 
 ## Use a Consistent Coding Style
 
-Home Assistant and all custom components use [black](https://github.com/ambv/black) to make sure the code follows the style.
+This project uses [ruff](https://docs.astral.sh/ruff/) for both linting and formatting, and [mypy](https://mypy-lang.org/) in strict mode. Both are configured in `pyproject.toml`.
 
-As mentioned above, the `pre-commit` hook will help enforce this.
+Don't format by hand. The `pre-commit` hooks set up below apply the formatting for you, and CI runs the same checks on every pull request.
 
 ## Developing & testing
+
+The integration requires Python 3.14.2 or newer, and supports Home Assistant 2026.3.0 or newer.
 
 This repository is set up with support for Visual Studio Code development containers. After you've forked and opened the repository, VS Code will prompt you to reopen the project inside a container.
 
 This allows you to easily run the integration against an isolated Home Assistant instance.
 
-Once open in the devcontainer, install dev and test dependencies:
+Dependencies are managed with [uv](https://docs.astral.sh/uv/). Install everything and configure the `pre-commit` checks with:
 
 ```
-pip install -r requirements_dev.txt
-pip install -r requirements_test.txt
+scripts/setup
 ```
 
-Then configure `pre-commit` checks:
+That is equivalent to:
 
 ```
-pre-commit install
+uv sync
+uv run pre-commit install
 ```
+
+The devcontainer is optional. `scripts/setup` works anywhere uv is installed, and uv downloads a suitable Python version for you.
+
+Run the tests and checks from the locked environment:
+
+```
+uv run pytest tests/
+uv run pre-commit run --all-files
+```
+
+To try your changes against a real inverter, start Home Assistant with:
+
+```
+scripts/develop
+```
+
+This creates a `config` directory on first run and serves Home Assistant on port 8123, forwarded to port 9123 on the host when using the devcontainer. VS Code also offers this as the "Run Home Assistant" task.
+
+Dependencies are declared in `pyproject.toml` and pinned in `uv.lock`, which is committed. If you change a dependency, run `uv lock` and include the updated lock file in your pull request.
 
 ## License
 
